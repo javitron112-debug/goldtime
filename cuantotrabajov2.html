@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeTracker Pro</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="TimeTracker">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2088/2088617.png">
+    
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlRpbWVUcmFja2VyIFBybyIsCiAgInNob3J0X25hbWUiIjogIlRpbWVUcmFja2VyIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmNWY1ZjciLAogICJ0aGVtZV9jb2xvciI6ICIwMDcxZTMiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi1pY29ucy1wbmcuZmxhdGljb24uY29tLzUxMi8yMDg4LzIwODg2MTYucG5nIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9LAogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzIwODgvMjA4ODYxNy5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0=">
+
+    <style>
+        /* Variables dinámicas para Modo Claro y Oscuro (Estilo Apple) */
+        :root {
+            --bg-color: #f5f5f7;
+            --card-bg: #ffffff;
+            --text-main: #1d1d1f;
+            --text-secondary: #86868b;
+            --accent: #0071e3;
+            --accent-green: #34c759;
+            --accent-red: #ff3b30;
+            --border-color: #d2d2d7;
+            --input-bg: #fafafa;
+            --radius: 16px;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --card-bg: #1c1c1e;
+            --text-main: #f5f5f7;
+            --text-secondary: #a1a1a6;
+            --accent: #0a84ff;
+            --accent-green: #30d158;
+            --accent-red: #ff453a;
+            --border-color: #38383a;
+            --input-bg: #1c1c1e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px 12px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Cabecera superior con controles de la App */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+        }
+
+        .app-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* Tarjetas */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(150, 150, 150, 0.05);
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: -0.3px;
+        }
+
+        /* Layout adaptativo optimizado para móvil (Flexbox/Grid fluido) */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .input-row-sub {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 16px; /* Evita zoom automático molesto en iOS */
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s ease;
+            -webkit-appearance: none; /* Estilo homogéneo en móviles */
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+        }
+
+        /* Reloj Gigante Adaptativo */
+        .timer-display {
+            font-size: 16vw; /* Tamaño dinámico basado en ancho de pantalla */
+            font-weight: 200;
+            text-align: center;
+            margin: 16px 0;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -1px;
+        }
+
+        @media (min-width: 650px) {
+            .timer-display {
+                font-size: 80px; /* Límite máximo en pantallas grandes */
+            }
+        }
+
+        /* Botoneras adaptativas */
+        .btn-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 10px;
+        }
+
+        button {
+            padding: 14px 16px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:active {
+            transform: scale(0.96);
+            opacity: 0.85;
+        }
+
+        .btn-primary { background-color: var(--accent); color: white; }
+        .btn-success { background-color: var(--accent-green); color: white; }
+        .btn-danger { background-color: var(--accent-red); color: white; }
+        .btn-secondary { background-color: #e8e8ed; color: #1d1d1f; }
+        [data-theme="dark"] .btn-secondary { background-color: #2c2c2e; color: #f5f5f7; }
+
+        /* Lista Historial optimizada para pantallas pequeñas (Sin desbordar) */
+        .table-container {
+            width: 100%;
+            overflow-x: hidden; /* Evitamos scroll horizontal feo */
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 280px; /* Limita la altura visual */
+            overflow-y: auto; /* Scroll vertical limpio si hay muchos registros */
+            padding-right: 4px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-radius: 12px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            gap: 8px;
+        }
+
+        .history-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .history-metadata {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .history-task-name {
+            font-weight: 600;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .history-date {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .history-duration {
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
+        .checkbox-custom {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* Resumen e información inferior */
+        .summary-box {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .total-amount {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+<div class="container">
+    
+    <div class="app-header">
+        <div class="app-title">⏱️ Tracker</div>
+        <button class="btn-secondary" id="themeToggleBtn" style="padding: 8px 12px; font-size: 14px; border-radius: 12px;" onclick="toggleTheme()">🌙 Modo Oscuro</button>
+    </div>
+    
+    <div class="card">
+        <div class="input-group">
+            <input type="text" id="taskName" placeholder="¿Qué tarea estás midiendo?" value="Mi Tarea">
+            
+            <div class="input-row-sub">
+                <select id="modeSelect" onchange="toggleModeInputs()">
+                    <option value="cronometro">Cronómetro</option>
+                    <option value="alarma">Alarma</option>
+                </select>
+                <input type="number" id="alarmMinutes" placeholder="Minutos" min="1" value="25" style="display: none;">
+            </div>
+        </div>
+
+        <div class="timer-display" id="display">00:00:00</div>
+
+        <div class="btn-container">
+            <button class="btn-success" id="startBtn" onclick="startTimer()">Iniciar</button>
+            <button class="btn-secondary" id="pauseBtn" onclick="pauseTimer()" style="display: none;">Pausar</button>
+            <button class="btn-danger" id="resetBtn" onclick="resetTimer()">Reiniciar</button>
+            <button class="btn-primary" id="saveBtn" onclick="saveSession()">Guardar</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h2>Registros Guardados</h2>
+            <button class="btn-secondary" style="padding: 6px 12px; font-size: 12px; border-radius: 10px;" onclick="clearHistory()">Borrar Todo</button>
+        </div>
+
+        <div class="table-container">
+            <div class="history-list" id="historyList">
+                </div>
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-row">
+                <span class="total-text">Selección sumada:</span>
+                <span class="total-amount" id="totalSelected">00:00:00</span>
+            </div>
+            <button class="btn-primary" style="width: 100%; border-radius: 16px;" onclick="exportToCSV()">Exportar Selección a Excel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let timerInterval = null;
+    let startTime = 0;
+    let elapsedTime = 0;
+    let isCountdown = false;
+    let countdownDuration = 0;
+    
+    // Capacidad ilimitada teórica (LocalStorage soporta ~5MB, equivalente a más de 30.000 grabaciones)
+    let historyData = JSON.parse(localStorage.getItem('timeTrackerData')) || [];
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function beep(delay) {
+        setTimeout(() => {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 900;
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.15);
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        }, delay);
+    }
+
+    function triggerTripleBeep() {
+        beep(0);
+        beep(250);
+        beep(500);
+    }
+
+    // Cambiar dinámicamente el modo visual
+    function toggleTheme() {
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+    }
+
+    function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        const btn = document.getElementById('themeToggleBtn');
+        if (theme === 'dark') {
+            btn.innerHTML = "☀️ Modo Claro";
+            localStorage.setItem('themePref', 'dark');
+        } else {
+            btn.innerHTML = "🌙 Modo Oscuro";
+            localStorage.setItem('themePref', 'light');
+        }
+    }
+
+    // Inicializar preferencias del sistema
+    function initTheme() {
+        const savedTheme = localStorage.getItem('themePref');
+        if (savedTheme) {
+            setTheme(savedTheme);
+        } else {
+            // Si no hay guardado, usa la preferencia del sistema operativo
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            setTheme(prefersDark ? 'dark' : 'light');
+        }
+    }
+
+    function toggleModeInputs() {
+        const mode = document.getElementById('modeSelect').value;
+        const alarmInput = document.getElementById('alarmMinutes');
+        if (mode === 'alarma') {
+            alarmInput.style.display = 'block';
+            isCountdown = true;
+            resetTimer();
+        } else {
+            alarmInput.style.display = 'none';
+            isCountdown = false;
+            resetTimer();
+        }
+    }
+
+    function startTimer() {
+        if (timerInterval) return;
+
+        // Desbloqueo preventivo de Audio en navegadores móviles tras toque de usuario
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        if (isCountdown && elapsedTime === 0) {
+            const mins = parseFloat(document.getElementById('alarmMinutes').value) || 0;
+            if (mins <= 0) return alert("Ingresa minutos válidos.");
+            countdownDuration = mins * 60 * 1000;
+            startTime = Date.now();
+            elapsedTime = countdownDuration;
+        } else {
+            startTime = Date.now() - elapsedTime;
+        }
+
+        timerInterval = setInterval(updateDisplay, 100);
+        document.getElementById('startBtn').style.display = 'none';
+        document.getElementById('pauseBtn').style.display = 'inline-block';
+    }
+
+    function pauseTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        document.getElementById('startBtn').style.display = 'inline-block';
+        document.getElementById('pauseBtn').style.display = 'none';
+    }
+
+    function resetTimer() {
+        pauseTimer();
+        elapsedTime = 0;
+        if (isCountdown) {
+            const mins = parseFloat(document.getElementById('alarmMinutes').value) || 0;
+            document.getElementById('display').textContent = formatTime(mins * 60 * 1000);
+        } else {
+            document.getElementById('display').textContent = "00:00:00";
+        }
+    }
+
+    function updateDisplay() {
+        if (isCountdown) {
+            let timePassed = Date.now() - startTime;
+            elapsedTime = countdownDuration - timePassed;
+
+            if (elapsedTime <= 0) {
+                elapsedTime = 0;
+                pauseTimer();
+                document.getElementById('display').textContent = formatTime(0);
+                triggerTripleBeep();
+                setTimeout(() => { alert("¡Tiempo cumplido!"); }, 10);
+                return;
+            }
+        } else {
+            elapsedTime = Date.now() - startTime;
+        }
+        document.getElementById('display').textContent = formatTime(elapsedTime);
+    }
+
+    function formatTime(ms) {
+        if (ms < 0) ms = 0;
+        let totalSeconds = Math.floor(ms / 1000);
+        let hours = Math.floor(totalSeconds / 3600);
+        let minutes = Math.floor((totalSeconds % 3600) / 60);
+        let seconds = totalSeconds % 60;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function saveSession() {
+        let finalTimeMs = 0;
+        
+        if (isCountdown) {
+            const mins = parseFloat(document.getElementById('alarmMinutes').value) || 0;
+            const initialMs = mins * 60 * 1000;
+            finalTimeMs = initialMs - elapsedTime;
+        } else {
+            finalTimeMs = elapsedTime;
+        }
+
+        if (finalTimeMs < 1000) {
+            alert("El tiempo es demasiado corto.");
+            return;
+        }
+
+        const taskName = document.getElementById('taskName').value.trim() || 'Tarea sin nombre';
+        const dateStr = new Date().toLocaleString([], {month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit'});
+
+        const session = {
+            id: Date.now(),
+            date: dateStr,
+            name: taskName,
+            durationMs: finalTimeMs,
+            durationStr: formatTime(finalTimeMs),
+            selected: true
+        };
+
+        // Almacenamiento total sin límites (hasta llenar el storage de ~30mil items)
+        historyData.unshift(session); // Pone el más nuevo al principio
+        updateLocalStorage();
+        renderHistory();
+        resetTimer();
+    }
+
+    function renderHistory() {
+        const listContainer = document.getElementById('historyList');
+        listContainer.innerHTML = '';
+
+        if (historyData.length === 0) {
+            listContainer.innerHTML = '<div style="text-align:center; color:var(--text-secondary); padding: 20px; font-size:14px;">No hay registros aún</div>';
+            calculateSelectedTotal();
+            return;
+        }
+
+        historyData.forEach((item) => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `
+                <div class="history-item-left">
+                    <input type="checkbox" class="checkbox-custom" data-id="${item.id}" ${item.selected ? 'checked' : ''} onchange="toggleItemSelection(this)">
+                    <div class="history-metadata">
+                        <span class="history-task-name">${item.name}</span>
+                        <span class="history-date">${item.date}</span>
+                    </div>
+                </div>
+                <div class="history-duration">${item.durationStr}</div>
+            `;
+            listContainer.appendChild(div);
+        });
+
+        calculateSelectedTotal();
+    }
+
+    function toggleItemSelection(checkbox) {
+        const id = parseInt(checkbox.dataset.id);
+        const item = historyData.find(i => i.id === id);
+        if (item) {
+            item.selected = checkbox.checked;
+            updateLocalStorage();
+            calculateSelectedTotal();
+        }
+    }
+
+    function calculateSelectedTotal() {
+        const totalMs = historyData
+            .filter(item => item.selected)
+            .reduce((sum, item) => sum + item.durationMs, 0);
+
+        document.getElementById('totalSelected').textContent = formatTime(totalMs);
+    }
+
+    function updateLocalStorage() {
+        localStorage.setItem('timeTrackerData', JSON.stringify(historyData));
+    }
+
+    function clearHistory() {
+        if(confirm("¿Seguro que deseas borrar el historial completo?")) {
+            historyData = [];
+            updateLocalStorage();
+            renderHistory();
+        }
+    }
+
+    function exportToCSV() {
+        const selectedItems = historyData.filter(item => item.selected);
+        if (selectedItems.length === 0) {
+            alert("Selecciona al menos un registro para exportar.");
+            return;
+        }
+
+        let csvContent = "\uFEFF"; // UTF-8 BOM
+        csvContent += "Fecha;Tarea;Duracion\n";
+
+        selectedItems.forEach(item => {
+            const safeName = item.name.replace(/;/g, ',');
+            csvContent += `${item.date};${safeName};${item.durationStr}\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Tiempos_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Service Worker dummy integrado para habilitar el motor de instalación PWA en navegadores compatibles
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGU9PntlLm9wZW5XaXRoKGVmZXRjaChlLnJlcXVlc3QpKX0pOw==', {scope: './'});
+        });
+    }
+
+    window.onload = () => {
+        initTheme();
+        renderHistory();
+    };
+</script>
+
+</body>
+</html>
